@@ -1,6 +1,8 @@
 node_modules
 .env
 .venv
+save_data.pkl
+hardhat.config.js
 
 # Hardhat files
 /cache
