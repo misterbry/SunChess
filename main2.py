@@ -1,22 +1,24 @@
 import pygame
 import chess
 import chess.engine
+import chess.polyglot
 from time import sleep
 from web3_connect import *
 import menu
 
 # Set window position
-os.environ['SDL_VIDEO_WINDOW_POS'] = "920,40"
+os.environ['SDL_VIDEO_WINDOW_POS'] = "900,30"
 # Initialize Pygame
 pygame.init()
 # WIDTH, HEIGHT = 480, 480
-WIDTH, HEIGHT = 1000, 1000
+WIDTH, HEIGHT = 1020, 1020
 SQUARE_SIZE = WIDTH // 8
 WHITE = (255, 255, 255)
 BLACK = (118, 150, 86)
 LIGHT_SQUARE = (238, 238, 210)
 DARK_SQUARE = (118, 150, 86)
 HIGHLIGHT_COLOR = (186, 202, 68)
+
 
 # Load chessboard images
 PIECES_IMAGES = {}
@@ -25,15 +27,23 @@ for piece in ['bp', 'br', 'bn', 'bb', 'bq', 'bk', 'wp', 'wr', 'wn', 'wb', 'wq', 
    PIECES_IMAGES[piece] = pygame.image.load(f"assets/{piece}.png")
    PIECES_IMAGES[piece] = pygame.transform.scale(PIECES_IMAGES[piece], (SQUARE_SIZE, SQUARE_SIZE))
 
-# Initialize Chess Board
-board = chess.Board() ## fen string can be argument
-print(dir(board))
+opponents = {0: "Glassjaw Joe", 1: "Von Kaiser", 2: "Piston Honda", 3: "Don Flamenco", 4: "King Hippo", 5: "Great Tiger", 6: "Bald Bull", 7: "Piston Honda", 8: "Soda Popinski", 9: "Bald Bull", 10: "Don Flamenco", 11: "Mr. Sandman", 12: "Super Macho Man", 13: "Mike Tyson"}
 
+start_pos = {
+   "default": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+   "b_king_only": "4k3/8/8/8/8/8/PPPPPPPP/RNBQKBNR w KQ - 0 1",
+   "e4e5": "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2"}
+
+# Initialize Chess Board
+# board = chess.Board("rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2") ## fen string can be argument
+board = chess.Board(start_pos["default"]) ## fen string can be argument
+
+# print(dir(board))
 
 # Initialize Stockfish
-
-komodo = "/Users/Bryan/Downloads/dragon-osx"
+# komodo = "/Users/Bryan/Downloads/dragon-osx"
 stockfish = chess.engine.SimpleEngine.popen_uci("/usr/games/stockfish")
+book_path = "/home/misterbry/Desktop/ChessBot/gm2001.bin"
 # stockfish = chess.engine.SimpleEngine.popen_uci(komodo) ## komodo engine
 # stockfish.configure({"UCI_LimitStrength": True, "UCI_Elo": 1350})
 
@@ -90,30 +100,7 @@ def noob():
     initial_setup("WALLET_SALT", base64.b64encode(salt).decode('utf-8'))
     initial_setup("ENCRYPTED_WALLET", base64.b64encode(encrypted_wallet).decode('utf-8'))
     initial_setup("USER_ADDRESS", account.address)
-    print(f"Welcome aboard. Your new address is {account.address}. Nice shirt")
-
-# def get_promotion_choice():
-#    screen = pygame.display.set_mode((400, 400))
-#    font = pygame.font.Font(None, 36)
-#    options = ["Queen", "Rook", "Bishop", "Knight"]
-#    running = True
-#    while running:
-#       screen.fill((0,0,0))
-#       for i, option in enumerate(options):
-#          text = font.render(option, True, (255,255,255))
-#          screen.blit(text, (50, 50 + i * 50))
-#          pygame.display.flip()
-#          for event in pygame.event.get():
-#             if event.type == pygame.QUIT:
-#                pygame.quit()
-#                exit()
-#             if event.type == pygame.MOUSEBUTTONDOWN:
-#                x, y = event.pos
-#                for i, option in enumerate(options):
-#                   if 50 <= x <= 250 and 50 + i * 50 <= y <= 100 + i * 50:
-#                      print(option[0].lower())
-#                      pygame.display.quit()
-#                      running = False
+    print(f"Welcome aboard. Your new address is {account.address}.")
 
 def promo_menu(screen):
    screen.fill((255, 255, 255))
@@ -127,8 +114,15 @@ def promo_menu(screen):
 def is_promotion(move, board):
    piece = board.piece_at(move.from_square)
    if piece and piece.piece_type == chess.PAWN:
-      if chess.square_rank(move.to_square) == (7 if piece.color == chess.WHITE else 0):
-         return True
+      legal_moves = [str(x) for x in board.legal_moves]
+      move_string = str(move)
+      if chess.square_rank(move.to_square) == (7 if piece.color == chess.WHITE else 0) and chess.square_rank(move.from_square) == (6 if piece.color == chess.WHITE else 0):
+         for i in legal_moves:
+            try:
+               if i[2:4] == move_string[2:]:
+                  return True
+            except Exception:
+               continue
    return False
 
 def handle_promo():
@@ -151,16 +145,21 @@ def handle_promo():
    
                   
 def main(account, player):
+    i = 0
     # address = os.getenv("USER_ADDRESS")
     address = account.address
     dev_address = os.getenv("DEV_ADDRESS")
     # player = contract.functions.getPlayer(address).call()
     skill_level = int(player[6])
-    print("Playing Glassjaw Joe, Level", skill_level)
+    os.system("clear")
+    print(f"Playing {opponents[skill_level]}, level {skill_level}")
+    print("-" * len(opponents[skill_level]) + "-" * 18)
+    sleep(2)
     stockfish.configure({"Skill Level": skill_level})
+    current_skill = stockfish.options["Skill Level"]
     
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
-    pygame.display.set_caption("Glassjaw Joe")
+    pygame.display.set_caption(opponents[skill_level])
     clock = pygame.time.Clock()
     selected_square = None
     running = True
@@ -178,14 +177,13 @@ def main(account, player):
                     selected_square = square
                 else:
                     # Try to move piece
-                    # promo_menu(screen)
-                    # handle_promo()
                     move = chess.Move(from_square=selected_square, to_square=square)
-                    print(move.uci())
+                    # print(move.uci())
                     # move_from_uci = chess.Move.from_uci(move.uci())
                     # print("PROMOTION:", move_from_uci.promotion)
                     if move in board.legal_moves:
-                        print("MOVE:", move)
+                        i += 1
+                        print(f"{i}. {board.san(move)}...", end='')
                         board.push(move)
                         selected_square = None
 
@@ -205,22 +203,24 @@ def main(account, player):
                             draw_board(screen)
                             draw_pieces(screen, board)
                             pygame.display.flip()
-                            break
+                            running = False
+                            continue
+                         
                         draw_board(screen)
                         draw_pieces(screen, board)
                         pygame.display.flip()
                         # Delay before bot move
                         sleep(1)
                         # Stockfish's turn
-                        analysis = stockfish.analyse(board, chess.engine.Limit(depth=1), multipv=3)
-                        print(analysis)
+                        analysis = stockfish.analyse(board, chess.engine.Limit(depth=10, time=1), multipv=3)
+                        # print(analysis)
                         best_move = analysis[0]['pv'][0].uci()
                         move_obj = None
                         try:
                            second_best_move = analysis[1]['pv'][0].uci()
                            third_best_move = analysis[2]['pv'][0].uci()
-                           move_obj = chess.Move.from_uci(third_best_move)
-                           print(third_best_move)
+                           move_obj = chess.Move.from_uci(second_best_move)
+                           # print(third_best_move)
                         except IndexError:
                            move_obj = chess.Move.from_uci(best_move)
                         
@@ -228,16 +228,27 @@ def main(account, player):
                         # weakened_move = sorted(analysis["pv"])[1]
                         # print(result.move)
                         # board.push(result.move)
-                        board.push(move_obj)
+                        try:
+                           with chess.polyglot.open_reader(book_path) as reader:
+                              book_move = next(reader.find_all(board)).move
+                              print(board.san(book_move))
+                              board.push(book_move)
+                              print("Book Move")
+                        except Exception:
+                           print(board.san(move_obj))
+                           board.push(move_obj)
+                           print("No more book moves")
                         # board.push(weakened_move)
                         if board.is_checkmate():
                             pygame.display.set_caption("Checkmate! You Lose :(")
-                            break
+                            sleep(2)
+                            running = False
+                            continue
                     elif is_promotion(move, board):
                        promo_menu(screen)
                        promo_piece = handle_promo()
                        move.promotion = promo_piece
-                       print(move)
+                       print(board.san(move))
                        board.push(move)
                        selected_square = None
                         # Redraw board after player move
@@ -263,15 +274,15 @@ def main(account, player):
                        # Delay before bot move
                        sleep(1)
                        # Stockfish's turn
-                       analysis = stockfish.analyse(board, chess.engine.Limit(depth=1), multipv=3)
-                       print(analysis)
+                       analysis = stockfish.analyse(board, chess.engine.Limit(depth=10, time=1), multipv=3)
+                       # print(analysis)
                        best_move = analysis[0]['pv'][0].uci()
                        move_obj = None
                        try:
                           second_best_move = analysis[1]['pv'][0].uci()
                           third_best_move = analysis[2]['pv'][0].uci()
-                          move_obj = chess.Move.from_uci(third_best_move)
-                          print(third_best_move)
+                          move_obj = chess.Move.from_uci(best_move)
+                          # print(third_best_move)
                        except IndexError:
                           move_obj = chess.Move.from_uci(best_move)
 
@@ -279,15 +290,25 @@ def main(account, player):
                        # weakened_move = sorted(analysis["pv"])[1]
                        # print(result.move)
                        # board.push(result.move)
-                       board.push(move_obj)
+                       try:
+                          with chess.polyglot.open_reader(book_path) as reader:
+                             book_move = next(reader.find_all(board)).move
+                             print(board.san(book_move))
+                             board.push(book_move)
+                             print("Book Move")
+                       except Exception:
+                          print(board.san(move_obj))
+                          board.push(move_obj)
+                          print("No more book moves")                       
+                       # board.push(move_obj)
                        # board.push(weakened_move)
                        if board.is_checkmate():
                            pygame.display.set_caption("Checkmate! You Lose :(")
                            break                       
                     else:
                         selected_square = None
-                        print("Move not legal")
-                        print(move)
+                        # print("Move not legal")
+                        # print(move)
                         
             # elif event.type == pygame.VIDEORESIZE:
             #     WIDTH, HEIGHT = event.w, event.h

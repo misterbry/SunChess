@@ -10,13 +10,13 @@ def main(w3, account, contract):
     options = []
     player = contract.functions.getPlayer(account.address).call()
     if player[0] == "":
-        user_input = input("You are new here. Would you like to join SunChess? ")
+        user_input = input("Are you ready to join SunChess? (y/n) ")
         while user_input[0] != "y" and user_input[0] != "n":
             user_input = input("Try again. Just type 'y' or 'n' ")
         if user_input[0] == "y":
             os.system('clear')
             print("Transfering gas funds, please wait...")
-            transfer_coin(w3, dev_account, account.address, 0.01)
+            transfer_coin(w3, dev_account, account.address, 0.1)
             print("Transfer complete.")
             username = input("What would you like your username to be? ")
             try:

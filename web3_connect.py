@@ -63,7 +63,7 @@ username = input("Enter your username >>> ")
 def splash():
     try:
         users = utils.load_users()
-        print(users)
+        # print(users)
         returning_user = users[username]
         print(returning_user.address)
         initial_setup("WALLET_SALT", returning_user.salt)
@@ -117,8 +117,8 @@ def returning(a, w, s):
             requests = contract.functions.getRequests().call({
                 "from": dev_address
             })
-            print("REQUESTS:", requests)
-            approval = bool(input(f"Approve {requests[0][0]}? "))
+            # print("REQUESTS:", requests)
+            approval = bool(input(f"Are you ready to join {requests[0][0]}? "))
             approve_receipt = menu.contract_tx(w3, dev_account, contract, "approvePlayer", (0, approval))
             if approval:
                 tx_receipt = transfer_coin(w3, dev_account, account.address, 0.25)
@@ -236,7 +236,7 @@ def noob():
     initial_setup("WALLET_SALT", salt)
     initial_setup("ENCRYPTED_WALLET", wallet)
     initial_setup("USER_ADDRESS", account.address)
-    print(f"Welcome aboard. Your new address is {account.address}. Nice shirt.")
+    print(f"Welcome aboard. Your new address is {account.address}.")
     if utils.data_exists():
         global users
         users = utils.load_users()
