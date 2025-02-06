@@ -212,14 +212,14 @@ def main(account, player):
                         # Delay before bot move
                         sleep(1)
                         # Stockfish's turn
-                        analysis = stockfish.analyse(board, chess.engine.Limit(depth=10, time=1), multipv=3)
+                        analysis = stockfish.analyse(board, chess.engine.Limit(depth=4, time=1), multipv=3)
                         # print(analysis)
                         best_move = analysis[0]['pv'][0].uci()
                         move_obj = None
                         try:
                            second_best_move = analysis[1]['pv'][0].uci()
                            third_best_move = analysis[2]['pv'][0].uci()
-                           move_obj = chess.Move.from_uci(second_best_move)
+                           move_obj = chess.Move.from_uci(third_best_move)
                            # print(third_best_move)
                         except IndexError:
                            move_obj = chess.Move.from_uci(best_move)
@@ -274,14 +274,14 @@ def main(account, player):
                        # Delay before bot move
                        sleep(1)
                        # Stockfish's turn
-                       analysis = stockfish.analyse(board, chess.engine.Limit(depth=10, time=1), multipv=3)
+                       analysis = stockfish.analyse(board, chess.engine.Limit(depth=4, time=1), multipv=3)
                        # print(analysis)
                        best_move = analysis[0]['pv'][0].uci()
                        move_obj = None
                        try:
                           second_best_move = analysis[1]['pv'][0].uci()
                           third_best_move = analysis[2]['pv'][0].uci()
-                          move_obj = chess.Move.from_uci(best_move)
+                          move_obj = chess.Move.from_uci(third_best_move)
                           # print(third_best_move)
                        except IndexError:
                           move_obj = chess.Move.from_uci(best_move)
