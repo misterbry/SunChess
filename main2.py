@@ -190,6 +190,7 @@ def main(account, player):
                         # Redraw board after player move
                         if board.is_checkmate():
                             pygame.display.set_caption("Checkmate! You Win :)")
+                            print("Checkmate! Nicely done!")
                             draw_board(screen)
                             draw_pieces(screen, board)
                             pygame.display.flip()
@@ -214,12 +215,17 @@ def main(account, player):
                         # Stockfish's turn
                         analysis = stockfish.analyse(board, chess.engine.Limit(depth=4, time=1), multipv=3)
                         # print(analysis)
-                        best_move = analysis[0]['pv'][0].uci()
+                        best_move = None
+                        try:
+                           best_move = analysis[0]['pv'][0].uci()
+                        except Exception:
+                           print("Stalemate!")
+                           exit()
                         move_obj = None
                         try:
                            second_best_move = analysis[1]['pv'][0].uci()
                            third_best_move = analysis[2]['pv'][0].uci()
-                           move_obj = chess.Move.from_uci(third_best_move)
+                           move_obj = chess.Move.from_uci(second_best_move)
                            # print(third_best_move)
                         except IndexError:
                            move_obj = chess.Move.from_uci(best_move)
@@ -243,6 +249,7 @@ def main(account, player):
                             pygame.display.set_caption("Checkmate! You Lose :(")
                             sleep(2)
                             running = False
+                            print("You have been checkmated :(\nBetter luck next time!")
                             continue
                     elif is_promotion(move, board):
                        promo_menu(screen)
@@ -254,6 +261,7 @@ def main(account, player):
                         # Redraw board after player move
                        if board.is_checkmate():
                            pygame.display.set_caption("Checkmate! You Win :)")
+                           print("Checkmate! You Win :)")
                            draw_board(screen)
                            draw_pieces(screen, board)
                            pygame.display.flip()
