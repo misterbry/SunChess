@@ -225,7 +225,7 @@ def main(account, player):
                         try:
                            second_best_move = analysis[1]['pv'][0].uci()
                            third_best_move = analysis[2]['pv'][0].uci()
-                           move_obj = chess.Move.from_uci(second_best_move)
+                           move_obj = chess.Move.from_uci(best_move)
                            # print(third_best_move)
                         except IndexError:
                            move_obj = chess.Move.from_uci(best_move)
@@ -289,7 +289,7 @@ def main(account, player):
                        try:
                           second_best_move = analysis[1]['pv'][0].uci()
                           third_best_move = analysis[2]['pv'][0].uci()
-                          move_obj = chess.Move.from_uci(third_best_move)
+                          move_obj = chess.Move.from_uci(best_move)
                           # print(third_best_move)
                        except IndexError:
                           move_obj = chess.Move.from_uci(best_move)
