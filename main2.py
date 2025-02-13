@@ -5,6 +5,7 @@ import chess.polyglot
 from time import sleep
 from web3_connect import *
 import menu
+from random import randint
 
 # Set window position
 os.environ['SDL_VIDEO_WINDOW_POS'] = "900,30"
@@ -27,7 +28,7 @@ for piece in ['bp', 'br', 'bn', 'bb', 'bq', 'bk', 'wp', 'wr', 'wn', 'wb', 'wq', 
    PIECES_IMAGES[piece] = pygame.image.load(f"assets/{piece}.png")
    PIECES_IMAGES[piece] = pygame.transform.scale(PIECES_IMAGES[piece], (SQUARE_SIZE, SQUARE_SIZE))
 
-opponents = {0: "Glassjaw Joe", 1: "Von Kaiser", 2: "Piston Honda", 3: "Don Flamenco", 4: "King Hippo", 5: "Great Tiger", 6: "Bald Bull", 7: "Piston Honda", 8: "Soda Popinski", 9: "Bald Bull", 10: "Don Flamenco", 11: "Mr. Sandman", 12: "Super Macho Man", 13: "Mike Tyson"}
+opponents = {0: "Glassjaw Joe", 1: "Von Kaiser", 2: "Piston Honda", 3: "Don Flamenco", 4: "King Hippo", 5: "Great Tiger", 6: "Bald Bull", 7: "Piston Honda", 8: "Soda Popinski", 9: "Bald Bull", 10: "Don Flamenco", 11: "Mr. Sandman", 12: "Super Macho Man", 13: "Mike Tyson", 14: "Mr. Bryan"}
 
 start_pos = {
    "default": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
@@ -82,7 +83,7 @@ def get_square_under_mouse():
 
 def noob():
     # Collect user input
-    password = getpass("It looks like this is your first time here. Please enter a password to get some booty. Pirate booty, that is >>> ")
+    password = getpass("It looks like this is your first time here. Please enter a password >>> ")
 
     # Generate a salt and derive a key from the password
     salt = os.urandom(16)
@@ -236,9 +237,13 @@ def main(account, player):
                         # board.push(result.move)
                         try:
                            with chess.polyglot.open_reader(book_path) as reader:
+                              # print("DEBUG:", list(reader.find_all(board)))
+                              book_move_count = len(list(reader.find_all(board)))
+                              # print("Book moves available:", book_move_count)
                               book_move = next(reader.find_all(board)).move
-                              print(board.san(book_move))
-                              board.push(book_move)
+                              book_move_2 = list(reader.find_all(board))[randint(0, book_move_count)].move
+                              print(board.san(book_move_2))
+                              board.push(book_move_2)
                               print("Book Move")
                         except Exception:
                            print(board.san(move_obj))
